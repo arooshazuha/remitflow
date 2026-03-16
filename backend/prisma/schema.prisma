@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  kycStatus String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallet    Wallet?
+  kyc       KYCVerification?
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Float    @default(0.0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id           String   @id @default(uuid())
+  walletId     String
+  type         String   // DEPOSIT, TRANSFER_IN, TRANSFER_OUT, PAYOUT
+  amount       Float
+  status       String   @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  referenceId  String?  // e.g. Stripe PaymentIntent ID
+  description  String?
+  createdAt    DateTime @default(now())
+
+  wallet       Wallet   @relation(fields: [walletId], references: [id])
+}
+
+model KYCVerification {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  fullName  String
+  idNumber  String
+  country   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
