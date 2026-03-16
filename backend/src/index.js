@@ -30,10 +30,12 @@ app.use('/api/kyc', require('./routes/kyc'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
   app.listen(port, () => {
     console.log(`Backend server running on http://localhost:${port}`);
   });
+} else {
+    console.log(`Exporting app for Vercel Serverless`);
 }
 
 // Export the app for Vercel Serverless
